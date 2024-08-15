@@ -1,9 +1,10 @@
-from authentication import get_form_service
+from googleapiclient.discovery import build
 
 # def add_question():
 
-def create_form(title:str, desc:str, questions:list):
-    form_service = get_form_service()
+def create_form(title:str, desc:str, questions:list, creds:object):
+    # form_service = authentication.get_form_service()
+    form_service = build('forms', 'v1', credentials=creds)
     update_body = {
         "requests": [
             {
@@ -28,7 +29,8 @@ def create_form(title:str, desc:str, questions:list):
         .batchUpdate(formId=res["formId"], body=update_body)
         .execute()
     )
-    return res.writeControl != None
+    print(res)
+    return res['writeControl'] != None
 
 
 # test

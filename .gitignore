@@ -2,3 +2,4 @@ credentials.json
 token.json
 forms/__pycache__
 .venv
+client_secrets.json
