@@ -1,12 +1,13 @@
-from requests import get, post
-import os
+def get_users_ids(users):
+    user_lookup = {}
+    for user in users:
+        user_lookup[user["profile"]["real_name_normalized"]] = user["id"]
+    return user_lookup
 
-def get_all_users():
-    url = "https://slack.com/api/users.identity"
-    user_list_response = get(url, headers={"Authorization": f"Bearer {os.environ.get('SLACK_BOT_TOKEN')}"})
-    print (user_list_response.content)
-def find_user_channel(user):
-    # POST https://slack.com/api/conversations.open
-    print()
+def get_all_users(bolt_app):
+    res = bolt_app.client.users_list()
+    users = res["members"]
+    return get_users_ids(users)
 
-get_all_users()
+def get_user_id (bolt_app, user_full_name):
+    return get_all_users(bolt_app).get(user_full_name)

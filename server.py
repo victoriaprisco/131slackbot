@@ -10,14 +10,12 @@ import re
 import flask
 from forms import read_form
 from forms import create_new_form
+from messages import message_sender
+
 app = Flask(__name__)
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 bolt_app = App(token=os.environ.get("SLACK_BOT_TOKEN"), signing_secret=os.environ.get("SLACK_SIGNING_SECRET"))
 handler = SlackRequestHandler(bolt_app)
-
-# @bolt_app.event("message")
-# def handle_message_events(body, logger):
-#     logger.info(body)
 
 SCOPES = ["https://www.googleapis.com/auth/forms.body", "https://www.googleapis.com/auth/forms.responses.readonly"]
 flow = InstalledAppFlow.from_client_secrets_file("credentials.json", scopes=SCOPES, redirect_uri="https://rat-relaxing-briefly.ngrok-free.app/131bot/authorize")
@@ -42,6 +40,13 @@ def start_auth(payload, say):
 def say_hello(payload, say):
     say("hello there")
 
+@bolt_app.message("131bot, say (.*) to (.*)")
+def send_it(payload, say):
+    regex = re.compile("say (.*) to (.*)")
+    (message, user_name) = regex.findall(payload["text"])[0]
+    status = message_sender.send_message(bolt_app, user_name, message)
+    say("sent!" if status else "an error occurred")
+
 @bolt_app.message("131bot, make a form")
 def make_form(payload, say):
     create_new_form.create_form("my test form2", "testytesty", [], get_token.get_token())
@@ -52,6 +57,18 @@ def trigger_form(payload, say):
     (form_id, question_body) = regex.findall(payload["text"])[0]
     res = read_form.read_form(form_id, question_body, get_token.get_token())
     say(f'ok! here are the responses {res}')
+    say(f'you are missing {read_form.compare_with_roster(res)}')
+
+@bolt_app.message(re.compile("131bot, send an alert form with id (.*) with text (.*)"))
+def search(payload, say):
+    regex = re.compile("id (.*) for question (.*)")
+    (form_id, text_body) = regex.findall(payload["text"])[0]
+    question_body = "Your preferred full name"
+    res = read_form.read_form(form_id, question_body, get_token.get_token())
+    unanswereds = read_form.compare_with_roster(res)
+    fails = message_sender.batch_send_message(bolt_app, unanswereds, text_body)
+    say(f'messages have been sent, the following didnt work: {fails}')
+
 
 @app.route("/131bot/events", methods=["POST"])
 def slack_events():
