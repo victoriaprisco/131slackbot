@@ -34,4 +34,4 @@ def compare_with_roster(responses):
     for ta in roster:
         if not ta in (response.title().strip() for response in responses):
             missing.append(ta)
-    return missing  
+    return missing

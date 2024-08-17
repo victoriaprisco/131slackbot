@@ -61,13 +61,14 @@ def trigger_form(payload, say):
 
 @bolt_app.message(re.compile("131bot, send an alert form with id (.*) with text (.*)"))
 def search(payload, say):
-    regex = re.compile("id (.*) for question (.*)")
+    regex = re.compile("id (.*) with text (.*)")
     (form_id, text_body) = regex.findall(payload["text"])[0]
     question_body = "Your preferred full name"
     res = read_form.read_form(form_id, question_body, get_token.get_token())
     unanswereds = read_form.compare_with_roster(res)
     fails = message_sender.batch_send_message(bolt_app, unanswereds, text_body)
-    say(f'messages have been sent, the following didnt work: {fails}')
+    msg = "all good!" if len(fails) == 0 else f'messages have been sent, the following didnt work: {fails}'
+    say(msg)
 
 
 @app.route("/131bot/events", methods=["POST"])
