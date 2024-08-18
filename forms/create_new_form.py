@@ -2,7 +2,7 @@ from googleapiclient.discovery import build
 
 # def add_question():
 
-def create_form(title:str, desc:str, questions:list, creds:object):
+def create_form(title:str, desc:str, questions:object, creds:object):
     # form_service = authentication.get_form_service()
     form_service = build('forms', 'v1', credentials=creds)
     update_body = {
@@ -16,11 +16,14 @@ def create_form(title:str, desc:str, questions:list, creds:object):
                     "updateMask": "*"
                 }
             },
-            # {
-            #     "createItem": {
-            #         "item": questions,
-            #     }
-            # }
+            {
+                "createItem": {
+                    "item": questions,
+                    "location": {
+                        "index": 0
+                    }
+                }
+            }
         ],
     }
     res = form_service.forms().create(body={"info": {"title": title} }).execute()

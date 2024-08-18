@@ -47,9 +47,24 @@ def send_it(payload, say):
     status = message_sender.send_message(bolt_app, user_name, message)
     say("sent!" if status else "an error occurred")
 
-@bolt_app.message("131bot, make a form")
+@bolt_app.message("131bot, make an attendance form for (.*)")
 def make_form(payload, say):
-    create_new_form.create_form("my test form2", "testytesty", [], get_token.get_token())
+    regex = re.compile("for (.*)")
+    (event_name) = regex.findall(payload["text"])[0]
+    questions = {
+                    "title": (
+                        "Your preferred full name"
+                    ),
+                    "questionItem": {
+                        "question": {
+                            "required": True,
+                            "textQuestion": {
+                                "paragraph": False
+                            },
+                        }
+                    },
+                }
+    create_new_form.create_form(f"{event_name} Attendance", "", questions, get_token.get_token())
 
 @bolt_app.message(re.compile("131bot, get me all responses for the form with id (.*) for question (.*)"))
 def trigger_form(payload, say):
