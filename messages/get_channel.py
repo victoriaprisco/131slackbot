@@ -7,13 +7,13 @@ def get_users_ids(users):
     return user_lookup 
 
 def get_all_users(bolt_app):
-    f = open("id_map.json", "a")
+    f = open("id_map.json", "r+")
     dump = json.load(f)
     if len(dump) == 0:
         res = bolt_app.client.users_list()
         users = res["members"]
         new_map = get_users_ids(users)
-        f.write(new_map)
+        f.write(json.dumps(new_map))
         f.close()
         return new_map
     return dump

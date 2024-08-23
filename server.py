@@ -48,6 +48,14 @@ def send_it(payload, say):
     status = message_sender.send_message(bolt_app, user_name, message)
     say("sent!" if status else "an error occurred")
 
+@bolt_app.message("131bot, test batch send to (\w+\s\w+)(,\s*\d+)*")
+def do_it(payload, say):
+    regex = re.compile("test batch send to (\w+\s\w+)(,\s*\d+)*")
+    (users) = list(regex.findall(payload["text"])[0])
+    fails = message_sender.batch_send_message(bolt_app, users, "testing testing 123")
+    msg = "all good!" if len(fails) == 0 else f'messages have been sent, the following didnt work: {fails}'
+    say(msg)
+
 @bolt_app.message("131bot, make an attendance form for (.*)")
 def make_form(payload, say):
     regex = re.compile("for (.*)")
