@@ -11,6 +11,7 @@ import flask
 from forms import read_form
 from forms import create_new_form
 from messages import message_sender
+from messages import slack_utils
 
 app = Flask(__name__)
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
@@ -85,6 +86,12 @@ def search(payload, say):
     msg = "all good!" if len(fails) == 0 else f'messages have been sent, the following didnt work: {fails}'
     say(msg)
 
+@bolt_app.message("131bot, send alert to people without profile pictures")
+def send_alert(payload, say):
+    anons = slack_utils.check_all_users_profile_pictures(bolt_app)
+    fails = message_sender.batch_send_message(bolt_app, anons, "Please make sure to set a Slack profile picture. It is very important so that we can see who you are!")
+    msg = "all good!" if len(fails) == 0 else f'messages have been sent, the following didnt work: {fails}'
+    say(msg)
 
 @app.route("/131bot/events", methods=["POST"])
 def slack_events():

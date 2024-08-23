@@ -4,3 +4,5 @@ forms/__pycache__
 .venv
 client_secrets.json
 roster.json
+id_map.json
+known_aliases.json
